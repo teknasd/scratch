@@ -206,6 +206,17 @@ class Tensor:
 
         out._backward = _backward
         return out
+        
+    # ---- Indexing ----
+    def __getitem__(self, idx):
+        out = Tensor(self.data[idx], (self,), 'slice')
+
+        def _backward():
+            if self.requires_grad:
+                self.grad[idx] += out.grad
+
+        out._backward = _backward
+        return out
 
     # ---- Reductions ----
     def sum(self, axis=None, keepdims=False):

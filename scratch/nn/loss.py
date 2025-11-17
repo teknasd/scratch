@@ -1,11 +1,16 @@
 from scratch.tensor import Tensor
 import numpy as np
+from loguru import logger
 
 class Loss:
     @staticmethod
     def cross_entropy(logits, target_index):
+        # convert tensor → Python int
+        if isinstance(target_index, Tensor):
+            target_index = int(target_index.data)
+
         log_probs = logits.log_softmax()
-        return -log_probs[target_index]
+        return -log_probs[0, target_index]  
 
     @staticmethod
     def mse(pred, target):
