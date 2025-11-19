@@ -25,6 +25,8 @@ class Trainer:
 
             for x, y in dataloader:
                 assert isinstance(x, Tensor) and isinstance(y, (Tensor, int))
+
+                # logger.info(f"x: {x.shape()}, y: {y.shape()}")
                 # Forward
                 y_pred = self.model(x)
 

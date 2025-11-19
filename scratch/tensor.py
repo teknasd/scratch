@@ -212,7 +212,14 @@ class Tensor:
         out = Tensor(self.data[idx], (self,), 'slice')
 
         def _backward():
-            if self.requires_grad:
+            if not self.requires_grad:
+                return
+            
+            # advanced indexing case
+            try:
+                np.add.at(self.grad, idx, out.grad)
+            except (TypeError, IndexError):
+                # fallback simple slice
                 self.grad[idx] += out.grad
 
         out._backward = _backward
@@ -244,8 +251,11 @@ class Tensor:
         # divisor depends on axis
         if axis is None:
             divisor = self.data.size
-        else:
+        elif isinstance(axis, int):
             divisor = self.data.shape[axis]
+        else:
+            divisor = np.prod([self.data.shape[a] for a in axis])
+
 
         out = Tensor(out_data, (self,), 'mean')
 
@@ -269,20 +279,11 @@ class Tensor:
         out = Tensor(clamped, (self,), 'clamp')
 
         def _backward():
+            if out.grad is None:
+                return
             if self.requires_grad:
                 mask = (self.data >= min_val) & (self.data <= max_val)
                 self.grad += out.grad * mask
-
-        out._backward = _backward
-        return out
-
-    def relu(self):
-        out_data = np.maximum(0, self.data)
-        out = Tensor(out_data, (self,), 'relu')
-
-        def _backward():
-            if self.requires_grad:
-                self.grad += (self.data > 0) * out.grad
 
         out._backward = _backward
         return out
@@ -292,6 +293,8 @@ class Tensor:
         out = Tensor(out_data, (self,), 'leaky_relu')
 
         def _backward():
+            if out.grad is None:
+                return
             if self.requires_grad:
                 grad = np.where(self.data > 0, 1, alpha)
                 self.grad += out.grad * grad
@@ -365,3 +368,7 @@ class Tensor:
 
         for v in reversed(topo):
             v._backward()
+
+    # ---- Shape ----
+    def shape(self):
+        return self.data.shape
