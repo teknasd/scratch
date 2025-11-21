@@ -2,7 +2,7 @@ import numpy as np
 from loguru import logger
 from tqdm import tqdm
 from time import monotonic
-
+from scratch.utils import profile_cpu, profile_mem
 from scratch.tensor import Tensor
 from scratch.nn.linear import Linear
 from scratch.nn.activations import ReLU, Sigmoid
@@ -16,7 +16,10 @@ class Trainer:
         self.loss_fn = loss_fn
         self.history = []
 
+    @profile_cpu()
+    @profile_mem()
     def fit(self, dataloader, epochs=10):
+
         logger.info(f"Training model for {len(self.model.parameters())} parameters for {epochs} epochs")
         start_time = monotonic()
         for epoch in tqdm(range(1, epochs + 1), desc="Epochs"):

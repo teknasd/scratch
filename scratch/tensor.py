@@ -1,8 +1,8 @@
 import numpy as np
 
 class Tensor:
-    def __init__(self, data, _children=(), _op='', requires_grad=True):
-        self.data = np.array(data, dtype=np.float64)
+    def __init__(self, data=None, _children=(), _op='', requires_grad=True, dtype=np.float64,shape=None):
+        self.data = np.array(data, dtype=dtype)
         self.requires_grad = requires_grad
         self.grad = np.zeros_like(self.data) if requires_grad else None
         self._backward = lambda: None
@@ -11,6 +11,67 @@ class Tensor:
 
     def __repr__(self):
         return f"Tensor(data={self.data}, grad={self.grad})"
+    
+    # ---- Factory methods for creating tensors ----
+    @staticmethod
+    def randn(*shape, requires_grad=True):
+        """
+        Create a tensor with random values from standard normal distribution.
+        
+        Args:
+            *shape: Shape of the tensor (e.g., Tensor.randn(2, 3) creates 2x3 tensor)
+            requires_grad: Whether to track gradients (default: True)
+        
+        Example:
+            x = Tensor.randn(3, 4)  # 3x4 tensor with random normal values
+        """
+        data = np.random.randn(*shape)
+        return Tensor(data, requires_grad=requires_grad)
+    
+    @staticmethod
+    def rand(*shape, requires_grad=True):
+        """
+        Create a tensor with random values from uniform distribution [0, 1).
+        
+        Args:
+            *shape: Shape of the tensor
+            requires_grad: Whether to track gradients (default: True)
+        
+        Example:
+            x = Tensor.rand(3, 4)  # 3x4 tensor with random uniform values
+        """
+        data = np.random.rand(*shape)
+        return Tensor(data, requires_grad=requires_grad)
+    
+    @staticmethod
+    def zeros(*shape, requires_grad=True):
+        """
+        Create a tensor filled with zeros.
+        
+        Args:
+            *shape: Shape of the tensor
+            requires_grad: Whether to track gradients (default: True)
+        
+        Example:
+            x = Tensor.zeros(3, 4)  # 3x4 tensor of zeros
+        """
+        data = np.zeros(shape)
+        return Tensor(data, requires_grad=requires_grad)
+    
+    @staticmethod
+    def ones(*shape, requires_grad=True):
+        """
+        Create a tensor filled with ones.
+        
+        Args:
+            *shape: Shape of the tensor
+            requires_grad: Whether to track gradients (default: True)
+        
+        Example:
+            x = Tensor.ones(3, 4)  # 3x4 tensor of ones
+        """
+        data = np.ones(shape)
+        return Tensor(data, requires_grad=requires_grad)
 
     # --- Helper: Unbroadcast gradient to target shape ---
     @staticmethod
