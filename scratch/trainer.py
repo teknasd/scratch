@@ -20,7 +20,9 @@ class Trainer:
     @profile_mem()
     def fit(self, dataloader, epochs=10):
 
-        logger.info(f"Training model for {len(self.model.parameters())} parameters for {epochs} epochs")
+        # Count total parameters in the model
+        total_params = sum(np.prod(param.data.shape) for param in self.model.parameters())
+        logger.info(f"Training model with {total_params} parameters for {epochs} epochs")
         start_time = monotonic()
         for epoch in tqdm(range(1, epochs + 1), desc="Epochs"):
             total_loss = 0.0
